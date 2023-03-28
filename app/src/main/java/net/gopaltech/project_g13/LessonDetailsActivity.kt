@@ -1,6 +1,7 @@
 package net.gopaltech.project_g13
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.service.autofill.OnClickAction
@@ -27,6 +28,7 @@ class LessonDetailsActivity : AppCompatActivity() {
     lateinit var notes: AppCompatEditText
     lateinit var saveNotesButton: AppCompatButton
     lateinit var makeComplete: AppCompatButton
+    lateinit var watchVideo: AppCompatButton
     lateinit var sharedPref: SharedPref
     lateinit var data: Lesson
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +38,8 @@ class LessonDetailsActivity : AppCompatActivity() {
         init()
         if (intent != null) {
             data = intent.getSerializableExtra("data") as Lesson
-            title.setText(data.name)
+            val position = intent.getIntExtra("position",0)
+            title.setText("${position+1}. ${data.name}")
             length.setText("Length ${data.length}")
             description.setText(data.description)
         }
@@ -51,6 +54,7 @@ class LessonDetailsActivity : AppCompatActivity() {
         notes = findViewById(R.id.notes)
         saveNotesButton = findViewById(R.id.saveNotesButton)
         makeComplete = findViewById(R.id.makeComplete)
+        watchVideo = findViewById(R.id.watchVideo)
         sharedPref = SharedPref(this)
     }
 
@@ -91,6 +95,16 @@ class LessonDetailsActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
             startActivity(Intent(this, LessonListActivity::class.java))
+        }
+        watchVideo.setOnClickListener() {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(data.videoLink)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                val toast = Toast.makeText(this, "Cannot open website", Toast.LENGTH_SHORT)
+                toast.show()
+            }
         }
     }
 

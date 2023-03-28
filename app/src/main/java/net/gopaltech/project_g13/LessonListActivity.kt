@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Switch
+import android.widget.Toast
+import androidx.appcompat.widget.AppCompatTextView
 import net.gopaltech.project_g13.model.Lesson
 import net.gopaltech.project_g13.utils.SharedPref
 import kotlin.math.log
@@ -13,7 +16,9 @@ import kotlin.math.log
 class LessonListActivity : AppCompatActivity(), LessonAdapter.onclickList {
     private lateinit var lessionList: ListView
     private lateinit var sharedPref: SharedPref
-    private lateinit var adapter:LessonAdapter
+    private lateinit var adapter: LessonAdapter
+    private lateinit var myNotes: AppCompatTextView
+    private lateinit var sequentialProgress: Switch
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lesson_list)
@@ -22,21 +27,45 @@ class LessonListActivity : AppCompatActivity(), LessonAdapter.onclickList {
         val data = Datahub.getInstance().lessonData
         adapter = LessonAdapter(this, data, this)
         lessionList = findViewById<ListView>(R.id.lessionList)
+        myNotes = findViewById(R.id.myNotes)
+        sequentialProgress = findViewById(R.id.sequentialProgress)
 
         lessionList.adapter = adapter
+        myNotes.setOnClickListener() {
+            startActivity(Intent(this, MyNotesActivity::class.java))
+        }
     }
 
-    override fun click(lesson: Lesson) {
-        val data = lesson
-        println(data)
-        val intent = Intent(this, LessonDetailsActivity::class.java)
-        intent.putExtra("data", data)
-        startActivity(intent)
+    override fun click(lesson: Lesson, position: Int, checkSequent: Boolean) {
+        if (sequentialProgress.isChecked) {
+            if (checkSequent) {
+                val data = lesson
+                println(data)
+                val intent = Intent(this, LessonDetailsActivity::class.java)
+                intent.putExtra("data", data)
+                intent.putExtra("position", position)
+                startActivity(intent)
+            } else {
+                Log.d("This", "Complete previous Lesson")
+                Toast.makeText(
+                    baseContext,
+                    "Please complete the previous lesson first",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } else {
+            val data = lesson
+            println(data)
+            val intent = Intent(this, LessonDetailsActivity::class.java)
+            intent.putExtra("data", data)
+            intent.putExtra("position", position)
+            startActivity(intent)
+        }
+
     }
 
     fun setData() {
         val datahub = Datahub.getInstance()
-
         val lesson1 = Lesson(
             "1",
             "Introduction to Kotlin",
@@ -84,11 +113,15 @@ class LessonListActivity : AppCompatActivity(), LessonAdapter.onclickList {
             false
         )
         val lessonData = datahub.lessonData
-        lessonData.add(lesson1)
-        lessonData.add(lesson2)
-        lessonData.add(lesson3)
-        lessonData.add(lesson4)
-        lessonData.add(lesson5)
+        if (lessonData.isEmpty()) {
+            lessonData.add(lesson1)
+            lessonData.add(lesson2)
+            lessonData.add(lesson3)
+            lessonData.add(lesson4)
+            lessonData.add(lesson5)
+        }
+
+        Log.d("this", "Again HERE")
     }
 
     override fun onResume() {

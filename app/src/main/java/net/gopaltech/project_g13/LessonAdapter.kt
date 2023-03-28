@@ -40,19 +40,24 @@ class LessonAdapter(val context: Context, val data: ArrayList<Lesson>, val oncli
         completeLesson = convertView.findViewById(R.id.completeLesson)
         item = convertView.findViewById(R.id.item)
 
-        itemCount.setText((parent+1).toString())
+        itemCount.setText((parent + 1).toString())
         title.setText(itemData.name)
-        length.setText(itemData.length)
-        if (!itemData.isCompete) completeLesson.visibility=View.GONE
+        length.setText("Length: ${itemData.length}")
+        if (!itemData.isCompete) completeLesson.visibility = View.GONE
 
         item.setOnClickListener() {
-            onclick.click(itemData)
+            if (parent == 0) {
+                onclick.click(itemData, parent, true)
+            } else {
+                onclick.click(itemData, parent, data.get(parent - 1).isCompete)
+            }
+
         }
         return convertView
     }
 
     interface onclickList {
-        fun click(lesson: Lesson)
+        fun click(lesson: Lesson, position: Int, checkSequent: Boolean)
 
     }
 }
